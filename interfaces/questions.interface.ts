@@ -1,7 +1,12 @@
+
+export interface IOptions {
+  id: string;
+  image: string;
+  text: string;
+  correct?: boolean;
+}
+
 export interface IQuestions {
-    id: string;
-    image: string;
-    text: string;
-    correct?: boolean;
-  }
-  
+  question: string;
+  options: IOptions[]
+}

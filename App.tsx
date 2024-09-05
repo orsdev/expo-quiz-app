@@ -1,25 +1,72 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card } from './components/ui';
-import allQuestions from './assets/data/allQuestions';
 import Constants from 'expo-constants';
-import { IQuestions } from './interfaces/questions.interface';
+import { IOptions, IQuestions } from './interfaces/questions.interface';
+import question from './assets/data/oneQuestionWithOption';
+import questions from './assets/data/imageMulatipleChoiceQuestions';
+import { useState } from 'react';
+import { Button } from './components/ui/Button';
 
 function App() {
+  const [selectedOption, setSelectedOption] = useState<IOptions | null>(null);
+  const [current, setCurrent] = useState(0)
+  const [selectedQuestion, setSelectedQuestion] = useState<IQuestions | null>(questions[current])
 
-  const currentQuestion = allQuestions[1].options as IQuestions[];
+  const handleCheck = () => {
+    if (selectedOption?.correct) {
+      Alert.alert('YAY!', 'You got it right', [
+        {
+          text: "Go to next question",
+          onPress: () => {
+            if (current < questions.length - 1) {
+              setCurrent((prev => prev + 1))
+              setSelectedQuestion(questions[current + 1]);
+              setSelectedOption(null)
+            }else {
+              Alert.alert('You won....')
+              setCurrent(0)
+              setSelectedQuestion(questions[0]);
+              setSelectedOption(null)
+            }
+          },
+          style: 'default'
+        }
+      ]);
+    } else {
+      Alert.alert('OOPS!', 'Please try again', [
+        {
+          text: 'Close',
+          style: 'destructive'
+        }
+      ])
+    }
+  }
 
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.container}>
-        <Text style={styles.heading}>Which of these is "the glass"?</Text>
-        <View style={styles.cardContainer} >
-          {currentQuestion?.map(item => (
-            <Card key={item.id} title={item.text} imageUri={item.image} />
+        <Text style={styles.heading}>{selectedQuestion?.question}</Text>
+        <View style={styles.cardContainer}>
+
+          {(selectedQuestion?.options as IOptions[])?.map(item => (
+            <Card
+              key={item.id}
+              {...item}
+              isSelected={!!selectedOption && selectedOption?.id == item.id}
+              onClick={() => {
+                setSelectedOption(item)
+              }}
+            />
           ))}
         </View>
-        <View style={styles.footer}>
-          <Text> Footer </Text>
+        <View style={styles.separator} />
+        <View style={[styles.footer, !selectedOption ? styles.disabledFooter : {}]}>
+          <Button
+            title="Check"
+            isDisabled={!selectedOption}
+            onClick={handleCheck}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -48,9 +95,18 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%'
   },
+  separator: {
+    marginVertical: 10,
+  },
   footer: {
-    backgroundColor: 'green',
-    height: 100
+    backgroundColor: '#DAF7A6',
+    display: 'flex',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    height: 80
+  },
+  disabledFooter: {
+    backgroundColor: '#ccc'
   }
 });
 
