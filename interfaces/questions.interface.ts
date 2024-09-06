@@ -10,3 +10,10 @@ export interface IQuestions {
   question: string;
   options: IOptions[]
 }
+
+export interface IOpenEnded {
+  id: string;
+  type: string;
+  text: string;
+  answer: string;
+}
